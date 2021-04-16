@@ -4,9 +4,9 @@ import re
 def main(do_x):
     file_orig = open('resources/orig/full_divina.txt', 'r+', encoding='utf-8')
     if do_x:
-        file_dest = open('resources/X_train.csv', 'w+', encoding='utf-8')
+        file_dest = open('resources/X.csv', 'w+', encoding='utf-8')
     else:
-        file_dest = open('resources/y_train.csv', 'w+', encoding='utf-8')
+        file_dest = open('resources/y.csv', 'w+', encoding='utf-8')
 
     lines_orig = file_orig.readlines()
     lines_dest = re.sub(r'([,])|([.])|([;])|([:])|([!])|([?])|'
