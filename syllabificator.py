@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 # import tensorflow_text as text
 import tensorflow as tf
 
-
 MASK_VALUE = -1
 MAX_WORD_LEN = None
 GEN_INDEX = 0
@@ -32,9 +31,8 @@ def encode_dataset(X, y):
         [encoded_set.append(w) for w in tmp_row.split('<s>')]
     encoded_set += ['<start>', '<end>', '<s>']
     encoded_set = set(encoded_set)
-    encoded_list = [[i, el] for i, el in enumerate(encoded_set)]
-    with open('resources/encoded_X.pickle', 'wb') as handle:
-        pickle.dump(encoded_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    encoded_array = np.array([[i, el] for i, el in enumerate(encoded_set)], dtype='object')
+    np.save("resources/encoded_X.npy", encoded_array, allow_pickle=True)
 
     encoded_set = []
     for row in y:
@@ -43,9 +41,8 @@ def encode_dataset(X, y):
     encoded_set += ['<syl>', '<s>']
     encoded_set = set(encoded_set)
     encoded_set.remove("")
-    encoded_list = [[i, el] for i, el in enumerate(encoded_set)]
-    with open('resources/encoded_y.pickle', 'wb') as handle:
-        pickle.dump(encoded_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    encoded_array = np.array([[i, el] for i, el in enumerate(encoded_set)], dtype='object')
+    np.save("resources/encoded_y.npy", encoded_array, allow_pickle=True)
 
     print("Data saved successfully!")
 
@@ -68,10 +65,10 @@ if __name__ == '__main__':
     X = np.loadtxt("resources/X.csv", dtype=str, delimiter=',', encoding='utf-8')
     y = np.loadtxt("resources/y.csv", dtype=str, delimiter=',', encoding='utf-8')
 
-    # encode_dataset(X, y)
-    with open('resources/encoded_X.pickle', 'rb') as f:
-        encode_X = pickle.load(f)
-    with open('resources/encoded_y.pickle', 'rb') as f:
-        encode_y = pickle.load(f)
+    encode_dataset(X, y)
 
-    print(encode_X[:5])
+    encode_X = np.load("resources/encoded_X.npy", allow_pickle=True)
+    encode_y = np.load("resources/encoded_y.npy", allow_pickle=True)
+
+    print(encode_X[:5], len(encode_X))
+    print(encode_y[:5], len(encode_y))
