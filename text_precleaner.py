@@ -69,6 +69,11 @@ def main(do_x):
         lines_dest = re.sub(r'\|', r'<syl>', lines_dest)
         lines_dest = re.sub(r' \n', r'\n', lines_dest)
         lines_dest = re.sub(r' ', r'<s>', lines_dest)
+        lines_dest = re.sub(r'^', r'<start>', lines_dest)
+        lines_dest = re.sub(r'\n', r'\n<start>', lines_dest)
+        lines_dest = re.sub(r'<start>$', r'', lines_dest)
+        lines_dest = re.sub(r'\n', r'<end>\n', lines_dest)
+
         # lines_dest = re.sub(r'(^-)|(\n-)', r'\n', lines_dest)
 
     file_dest.writelines(lines_dest)
