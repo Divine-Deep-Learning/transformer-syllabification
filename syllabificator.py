@@ -1,4 +1,5 @@
 import collections
+import copy
 import logging
 import os
 import pathlib
@@ -35,7 +36,7 @@ def encode_dataset(X, y):
         [encoded_set.append(w) for w in tmp_row.split('<s>')]
     encoded_set += ['<start>', '<end>', '<s>']
     encoded_set = set(encoded_set)
-    [encoded_X.add(i, w) for i, w in enumerate(encoded_set)]
+    [encoded_X.add(i + 1, w) for i, w in enumerate(encoded_set)]
     with open('resources/encoded_X.pickle', 'wb') as handle:
         pickle.dump(encoded_X, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -48,7 +49,7 @@ def encode_dataset(X, y):
     encoded_set += ['<syl>', '<s>', '<start>', '<end>']
     encoded_set = set(encoded_set)
     encoded_set.remove("")
-    [encoded_y.add(i, w) for i, w in enumerate(encoded_set)]
+    [encoded_y.add(i + 1, w) for i, w in enumerate(encoded_set)]
     with open('resources/encoded_y.pickle', 'wb') as handle:
         pickle.dump(encoded_y, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -377,6 +378,16 @@ def make_batches(X_y_tok, batch_size):
     return batches
 
 
+def check_next_syl(two_way_y, syl, output, sentence):
+    syl = detokenize(two_way_y, syl)
+    output = detokenize(two_way_y, output)
+    output = re.sub(r'<syl>', '', output)
+    sentence = re.sub(output, '', sentence)
+    if syl == '<syl>' or syl == '<end>' or re.search(r'^' + syl, sentence):
+        return True
+    return False
+
+
 def evaluate(sentence, max_length=40):
     encoder_input = tf.cast(tf.convert_to_tensor([tokenize(two_way_X, sentence)]), tf.int64)
     # as the target is english, the first word to the transformer should be the
@@ -398,8 +409,28 @@ def evaluate(sentence, max_length=40):
                                                      dec_padding_mask)
         # select the last word from the seq_len dimension
         predictions = predictions[:, -1:, :]  # (batch_size, 1, vocab_size)
-        predicted_id = tf.argmax(predictions, axis=-1)
-        # concatentate the predicted_id to the output which is given to the decoder as its input.
+
+        """ CHANGE START: decomment only one of them """
+        """ 1 - ORIGINAL"""
+        # predicted_id = tf.argmax(predictions, axis=-1)
+
+        """ 2 - MODIFIED"""
+
+        count = 0
+        while True:
+            if count == 5:
+                break
+            predicted_id = tf.argmax(predictions, axis=-1)
+            # concatentate the predicted_id to the output which is given to the decoder as its input.
+            if check_next_syl(two_way_y, copy.deepcopy(predicted_id), output, sentence):
+                break
+            predictions = predictions.numpy()
+            predictions[:, :, predicted_id.numpy()] = -100
+            predictions = tf.convert_to_tensor(predictions)
+            count += 1
+
+        """ CHANGE STOP """
+
         output = tf.concat([output, predicted_id], axis=-1)
         # return the result if the predicted_id is equal to the end token
         if predicted_id == end:
@@ -413,15 +444,14 @@ if __name__ == '__main__':
     X = np.loadtxt("resources/X.csv", dtype=str, delimiter=',', encoding='utf-8')
     y = np.loadtxt("resources/y.csv", dtype=str, delimiter=',', encoding='utf-8')
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.03, random_state=0)
 
     # encode_dataset(X, y)
+
     with open('resources/encoded_X.pickle', 'rb') as f:
         two_way_X = pickle.load(f)
     with open('resources/encoded_y.pickle', 'rb') as f:
         two_way_y = pickle.load(f)
-
-    print([two_way_y.get(i) for i in range(10)])
 
     n, d = 2048, 512
     pos_encoding = positional_encoding(n, d)
@@ -472,7 +502,7 @@ if __name__ == '__main__':
         ckpt.restore(ckpt_manager.latest_checkpoint)
         print('Latest checkpoint restored!!')
 
-    EPOCHS = 15
+    EPOCHS = 5
     BATCH_SIZE = 64
     train_batches = make_batches(tokenize_pairs(X_train, y_train), batch_size=BATCH_SIZE)
     test_batches = tokenize_pairs(X_test, y_test)
@@ -499,6 +529,7 @@ if __name__ == '__main__':
             print(f'Epoch {epoch + 1} Loss {train_loss.result():.4f} Accuracy {train_accuracy.result():.4f}')
             print(f'Time taken for 1 epoch: {time.time() - start:.2f} secs\n')
 
+    # fit()
 
     def evaluate_test(X_test, y_test):
         print(len(X_test))
@@ -507,7 +538,7 @@ if __name__ == '__main__':
             pred_text, attention_w = evaluate(query_sent)
             pred_text = make_human_understandable(pred_text)
             true_sent = make_human_understandable(true_sent)
-            # print(f"pred: {pred_text}\norig: {true_sent}")
+            print(f"pred: {pred_text}\norig: {true_sent}")
             lev = levenshtein_distance(pred_text, true_sent)
             lower = abs(len(pred_text) - len(true_sent))
             upper = max(len(pred_text), len(true_sent))
