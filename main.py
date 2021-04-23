@@ -20,7 +20,7 @@ def encode_dataset(X, y):
     encoded_set = []
     for row in X:
         tmp_row = re.sub(r'<start>|<end>|<syl>', r'', row)
-        [encoded_set.append(w) for w in tmp_row.split('<s>')]
+        [[encoded_set.append(c) for c in w] for w in tmp_row.split('<s>')]
     encoded_set += ['<start>', '<end>', '<s>']
     encoded_set = set(encoded_set)
     [encoded_X.add(i + 1, w) for i, w in enumerate(encoded_set)]
@@ -43,7 +43,7 @@ def encode_dataset(X, y):
     print("Data saved successfully!")
 
 
-def tokenize(two_way, line):
+def tokenize(two_way, line, X=True):
     spaced_line = re.sub(r'<', r' <', line)
     spaced_line = re.sub(r'>', r'> ', spaced_line)
     spaced_line = re.sub(r'^ | $', r'', spaced_line)
@@ -54,7 +54,16 @@ def tokenize(two_way, line):
             spaced_line.remove('')
         except ValueError:
             break
-    return [two_way.get(e) for e in spaced_line]
+    if X:
+        tok_X = []
+        for w in spaced_line:
+            if w in ['<start>', '<end>', '<s>']:
+                tok_X.append(two_way.get(w))
+            else:
+                [tok_X.append(two_way.get(c)) for c in w]
+        return tok_X
+    else:
+        return [two_way.get(e) for e in spaced_line]
 
 
 def detokenize(two_way, line):
@@ -70,8 +79,8 @@ def make_human_understandable(sentence):
 
 
 def tokenize_pairs(X, y):
-    X_tok = [tokenize(two_way_X, l) for l in X]
-    y_tok = [tokenize(two_way_y, l) for l in y]
+    X_tok = [tokenize(two_way_X, l, X=True) for l in X]
+    y_tok = [tokenize(two_way_y, l, X=False) for l in y]
     return X_tok, y_tok
 
 
