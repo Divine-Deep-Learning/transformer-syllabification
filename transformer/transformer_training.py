@@ -42,7 +42,7 @@ num_heads = 8
 dropout_rate = 0.1
 '''
 
-EPOCHS = 10
+EPOCHS = 30
 num_layers = 4
 d_model = 128
 dff = 512

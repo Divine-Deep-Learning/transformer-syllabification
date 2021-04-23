@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 from transformer.transformer_tools import create_masks
 from transformer.transformer_training import transformer
-from syllabificator import detokenize, tokenize, make_human_understandable
+from main import detokenize, tokenize, make_human_understandable
 from Levenshtein import distance as levenshtein_distance
 
 
@@ -55,7 +55,6 @@ def evaluate(sentence, two_way_X, two_way_y, max_length=40):
             predictions[:, :, predicted_id.numpy()] = -100
             predictions = tf.convert_to_tensor(predictions)
             count += 1
-
         """ CHANGE STOP """
 
         output = tf.concat([output, predicted_id], axis=-1)
