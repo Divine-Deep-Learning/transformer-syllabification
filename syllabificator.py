@@ -47,6 +47,7 @@ def tokenize(two_way, line):
     spaced_line = re.sub(r'<', r' <', line)
     spaced_line = re.sub(r'>', r'> ', spaced_line)
     spaced_line = re.sub(r'^ | $', r'', spaced_line)
+    spaced_line = re.sub(r'[ ]+', r' ', spaced_line)
     spaced_line = spaced_line.split(' ')
     while True:
         try:
@@ -102,7 +103,8 @@ if __name__ == '__main__':
     test_batches = make_batches(tokenize_pairs(X_test, y_test), batch_size=BATCH_SIZE)
     # transformer_training.fit(train_batches)
 
-    evaluate.evaluate_test(X_test, y_test, two_way_X, two_way_y)
-    '''text, pesi = evaluate("<start>e<s>non<s>mi<s>si<s>partia<s>dinanzi<s>al<end>", max_length=80)
+    # evaluate.evaluate_test(X_test, y_test, two_way_X, two_way_y)
+    '''text, pesi = evaluate.evaluate("<start>gnocche<s>non<s>mi<s>si<s>partia<s>dinanzi<s>al<end>",
+                                   two_way_X, two_way_y, max_length=80)
     print(make_human_understandable(text))
     print(text)'''

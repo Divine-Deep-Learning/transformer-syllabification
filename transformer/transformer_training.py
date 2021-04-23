@@ -42,7 +42,7 @@ num_heads = 8
 dropout_rate = 0.1
 '''
 
-EPOCHS = 5
+EPOCHS = 10
 num_layers = 4
 d_model = 128
 dff = 512
@@ -106,7 +106,7 @@ def fit(train_batches):
                     f' Loss {train_loss.result():.4f}'
                     f' Accuracy {train_accuracy.result():.4f}')
 
-                if (epoch + 1) % 5 == 0:
+                if (epoch + 1) % 3 == 0:
                     ckpt_save_path = ckpt_manager.save()
                     print(f'Saving checkpoint for epoch {epoch + 1} at {ckpt_save_path}')
 

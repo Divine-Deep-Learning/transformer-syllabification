@@ -70,7 +70,7 @@ def evaluate(sentence, two_way_X, two_way_y, max_length=40):
 def evaluate_test(X_test, y_test, two_way_X, two_way_y):
     print(len(X_test))
     distances = []
-    for query_sent, true_sent in zip(X_test[30:50], y_test[30:50]):
+    for query_sent, true_sent in zip(X_test[0:30], y_test[0:30]):
         pred_text, attention_w = evaluate(query_sent, two_way_X, two_way_y)
         pred_text = make_human_understandable(pred_text)
         true_sent = make_human_understandable(true_sent)
