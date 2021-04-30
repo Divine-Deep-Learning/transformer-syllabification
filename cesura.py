@@ -19,7 +19,8 @@ def check_male_caesura(formed_verse):
 
 
 def check_liric_caesura(formed_verse):
-    if (formed_verse[2][0] == 1) and (formed_verse[2][1] == 0) and (formed_verse[3][0] == 0) and (formed_verse[3][1] == 1):
+    if (formed_verse[2][0] == 1) and (formed_verse[2][1] == 0) \
+            and (formed_verse[3][0] == 0) and (formed_verse[3][1] == 1):
         return 3
     return 0
 
@@ -27,7 +28,8 @@ def check_liric_caesura(formed_verse):
 def check_female_caesura(formed_verse):
     pos = 0
     for i, (acc, end) in enumerate(formed_verse):
-        if (acc == 1) and (i == 5 or i == 3) and (end == 0) and (formed_verse[i+1][1] == 1) and (formed_verse[i+1][0] == 0):
+        if (acc == 1) and (i == 5 or i == 3) and (end == 0) \
+                and (formed_verse[i + 1][1] == 1) and (formed_verse[i + 1][0] == 0):
             pos = i + 1
             break
     return pos
@@ -42,9 +44,10 @@ def main():
 
     lines_X = file_X.readlines()
     lines_y = file_y.readlines()
-
     new_lines = []
-    for i, syl_line in enumerate(lines_X[:10]):
+
+    for i, syl_line in enumerate(lines_X[:30]):
+        ##### STRIPPING DOWN VERSE #####
         syl_line = re.sub(r'<start>|<end>|\n', '', syl_line)
         syl_line = re.sub(r"'", "’", syl_line)
         words = syl_line.split('<s>')
@@ -54,42 +57,45 @@ def main():
             rel_pos, n_syl = dictionary[w][0][0][2], dictionary[w][0][0][1]
             abs_pos += n_syl
             pos_acc_array.append((rel_pos, n_syl, abs_pos + rel_pos))
+        #  pos_acc_array contiene una tripla per ogni parola:
+        #  (pos accento dal fondo, numero sillabe della parola, posizione assoluta dell'accento)
 
-        #  pos_acc_array contiene una tripla per ogni parola: pos accento dal fondo, numero sillabe della parola e posizione assoluta dell'accento
+        words_syl = re.sub(r'<start>|<end>|\n', '', lines_y[i])
+        words_syl = re.sub(r"'", "’", words_syl)
+        words_syl = re.sub(r'<syl>', '', words_syl, count=1)
+        words_syl = words_syl.split('<s><syl>')
+        # words_syl è una lista di parole contenenti <syl> e <s> in caso di sinalefe
 
-        syl_words = re.sub(r'<start>|<end>|\n', '', lines_y[i])
-        syl_words = re.sub(r"'", "’", syl_words)
-        syl_words = re.sub(r'<syl>', '', syl_words, count=1)
-        syl_words = syl_words.split('<s><syl>')
-        # syl_words è una lista di parole contenenti <syl> e <s> in caso di sinalefe
-        formed_verse = np.zeros((11, 2))
-        index = 0
-        for j, w in enumerate(syl_words):
-            syls = w.split('<syl>')
-            for k in range(len(syls)):
+        formed_verse = []
+        for j, w in enumerate(words_syl):
+            word_syls = w.split('<syl>')
+            for rel_syl_index in range(len(word_syls)):
                 prop = [0, 0]
-                if len(syls) + pos_acc_array[j][0] - 1 == k:
+                if len(word_syls) + pos_acc_array[j][0] - 1 == rel_syl_index:
                     prop[0] = 1
-                if k == len(syls) - 1:
+                if rel_syl_index == len(word_syls) - 1:
                     prop[1] = 1
-                formed_verse[index + k] = np.array(prop)
-            index += len(syls)
-        # formed_verse è un vettore di 11 elementi [accento?, ultima sillaba della parola?]
+                formed_verse.append(prop)
+        # formed_verse è una lista di 11 elementi
+        # [accento sulla sillaba corrente?, ultima sillaba della parola?]
+
         pos = check_male_caesura(formed_verse)
         if pos == 0:
             pos = check_liric_caesura(formed_verse)
         if pos == 0:
             pos = check_female_caesura(formed_verse)
+
+        ##### REBUILDING VERSE ####
         new_line = '<start><syl>'
         counter = -1
-        for j, w in enumerate(syl_words):
+        for j, w in enumerate(words_syl):
             counter += len(w.split('<syl>'))
             new_line += w
             if counter != pos:
                 new_line += '<s>'
             else:
                 new_line += '<c><s>'
-            if j < len(syl_words) - 1:
+            if j < len(words_syl) - 1:
                 new_line += '<syl>'
         new_line += '<end>\n'
         new_lines.append(new_line)
