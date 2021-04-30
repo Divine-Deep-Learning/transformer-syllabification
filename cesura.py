@@ -72,11 +72,14 @@ def main():
         # words_syl è una lista di parole contenenti <syl> e <s> in caso di sinalefe
 
         formed_verse = []
+        num_snl = 0 # recalculates for each line the number of synalefa
         for j, w in enumerate(words_syl):
             word_syls = w.split('<syl>')
             for rel_syl_index in range(len(word_syls)):
                 prop = [0, 0]
-                if len(word_syls) + pos_acc_array[j][0] - 1 == rel_syl_index:
+                # FIXME: find where to insert num_snl, not sure this is right
+                num_snl += len(re.findall(r'<s>', word_syls[rel_syl_index]))
+                if len(word_syls) + pos_acc_array[j + num_snl][0] - 1 == rel_syl_index:
                     prop[0] = 1
                 if rel_syl_index == len(word_syls) - 1:
                     prop[1] = 1
@@ -104,6 +107,10 @@ def main():
                 new_line += '<syl>'
         new_line += '<end>\n'
         new_lines.append(new_line)
+
+        '''print(pos_acc_array)
+        print(formed_verse)
+        print(new_line)'''
 
     # Troubleshooting
     print(f"Added {sum([len(re.findall(r'<c>', line)) for line in new_lines])} "
