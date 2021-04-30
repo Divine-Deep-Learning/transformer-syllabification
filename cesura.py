@@ -88,9 +88,9 @@ def main():
         # [accento sulla sillaba corrente?, ultima sillaba della parola?]
 
         pos = check_male_caesura(formed_verse)
-        if pos == 0:
+        if pos < 3:
             pos = check_liric_caesura(formed_verse)
-        if pos == 0:
+        if pos < 3:
             pos = check_female_caesura(formed_verse)
 
         ##### REBUILDING VERSE ####
@@ -108,11 +108,12 @@ def main():
         new_line += '<end>\n'
 
         if '<c>' in new_line:
+            new_line = re.sub(r'(’)|(‘)', '\'', new_line)
             new_lines.append(new_line)
 
-        '''print(pos_acc_array)
+        print(pos_acc_array)
         print(formed_verse)
-        print(new_line)'''
+        print(new_line)
 
     # Troubleshooting
     print(f"Added {sum([len(re.findall(r'<c>', line)) for line in new_lines])} "
