@@ -42,26 +42,36 @@ def main():
     with open('./resources/orig/dantes_dictionary.pkl', 'rb') as f:
         dictionary = pickle.load(f)
 
+    # Latin words not considered in dictionary from Asperti
+    dictionary['aegypto'] = [((1, 2, -1, 0), 'a|egyp|to', 1)]
+    dictionary['voil'] = [((1, 1, 0, 0), 'voil', 1)]
+    dictionary['gausen'] = [((0, 2, 0, 0), 'gau|sen', 1)]
+    dictionary['goi'] = [((0, 1, 0, 0), 'goi', 1)]
+
     lines_X = file_X.readlines()
     lines_y = file_y.readlines()
     new_lines = []
 
-    for i, syl_line in enumerate(lines_X[:30]):
+    for i, syl_line in enumerate(lines_X):
         ##### STRIPPING DOWN VERSE #####
         syl_line = re.sub(r'<start>|<end>|\n', '', syl_line)
-        syl_line = re.sub(r"'", "’", syl_line)
+        # using default " ’ " type in X and y, reconvert at the end
         words = syl_line.split('<s>')
         pos_acc_array = []
         abs_pos = -1
         for w in words:
-            rel_pos, n_syl = dictionary[w][0][0][2], dictionary[w][0][0][1]
+            try:
+                rel_pos, n_syl = dictionary[w][0][0][2], dictionary[w][0][0][1]
+            except KeyError:
+                print(w, i)
+                exit()
+
             abs_pos += n_syl
             pos_acc_array.append((rel_pos, n_syl, abs_pos + rel_pos))
         #  pos_acc_array contiene una tripla per ogni parola:
         #  (pos accento dal fondo, numero sillabe della parola, posizione assoluta dell'accento)
 
         words_syl = re.sub(r'<start>|<end>|\n', '', lines_y[i])
-        words_syl = re.sub(r"'", "’", words_syl)
         words_syl = re.sub(r'<syl>', '', words_syl, count=1)
         words_syl = words_syl.split('<s><syl>')
         # words_syl è una lista di parole contenenti <syl> e <s> in caso di sinalefe
@@ -99,6 +109,10 @@ def main():
                 new_line += '<syl>'
         new_line += '<end>\n'
         new_lines.append(new_line)
+
+    # Troubleshooting
+    print(f"Added {sum([len(re.findall(r'<c>', line)) for line in new_lines])} "
+          f"caesuras instead of  {len(lines_X)}")
 
     file_dest.writelines(new_lines)
     file_y.close()
