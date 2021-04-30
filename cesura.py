@@ -106,7 +106,9 @@ def main():
             if j < len(words_syl) - 1:
                 new_line += '<syl>'
         new_line += '<end>\n'
-        new_lines.append(new_line)
+
+        if '<c>' in new_line:
+            new_lines.append(new_line)
 
         '''print(pos_acc_array)
         print(formed_verse)
