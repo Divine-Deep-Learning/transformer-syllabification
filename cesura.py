@@ -60,12 +60,7 @@ def main():
         pos_acc_array = []
         abs_pos = -1
         for w in words:
-            try:
-                rel_pos, n_syl = dictionary[w][0][0][2], dictionary[w][0][0][1]
-            except KeyError:
-                print(w, i)
-                exit()
-
+            rel_pos, n_syl = dictionary[w][0][0][2], dictionary[w][0][0][1]
             abs_pos += n_syl
             pos_acc_array.append((rel_pos, n_syl, abs_pos + rel_pos))
         #  pos_acc_array contiene una tripla per ogni parola:
@@ -112,7 +107,7 @@ def main():
 
     # Troubleshooting
     print(f"Added {sum([len(re.findall(r'<c>', line)) for line in new_lines])} "
-          f"caesuras instead of  {len(lines_X)}")
+          f"caesuras instead of {len(lines_X)}")
 
     file_dest.writelines(new_lines)
     file_y.close()
