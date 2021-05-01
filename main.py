@@ -31,9 +31,9 @@ def encode_dataset(X, y):
     encoded_set = []
     for row in y:
         tmp_row = re.sub(r'<syl>', r'<s>', row)
-        tmp_row = re.sub(r'<start>|<end>', r'', tmp_row)
+        tmp_row = re.sub(r'<start>|<end>|<c>', r'', tmp_row)
         [encoded_set.append(w) for w in tmp_row.split('<s>')]
-    encoded_set += ['<syl>', '<s>', '<start>', '<end>']
+    encoded_set += ['<syl>', '<s>', '<start>', '<end>', '<c>']
     encoded_set = set(encoded_set)
     encoded_set.remove("")
     [encoded_y.add(i + 1, w) for i, w in enumerate(encoded_set)]
@@ -71,6 +71,11 @@ def detokenize(two_way, line):
     return ''.join(sentence)
 
 
+def detokenize_(two_way, line):
+    sentence = [two_way.get(e) for e in line]
+    return ''.join(sentence)
+
+
 def make_human_understandable(sentence):
     sentence = re.sub(r'<start>|<end>', r'', sentence)
     sentence = re.sub(r'<syl>', r'|', sentence)
@@ -96,10 +101,10 @@ def make_batches(X_y_tok, batch_size):
 
 
 if __name__ == '__main__':
-    X = np.loadtxt("resources/X.csv", dtype=str, delimiter=',', encoding='utf-8')
-    y = np.loadtxt("resources/y.csv", dtype=str, delimiter=',', encoding='utf-8')
+    X = np.loadtxt("resources/X_cesura.csv", dtype=str, delimiter=',', encoding='utf-8')
+    y = np.loadtxt("resources/y_cesura.csv", dtype=str, delimiter=',', encoding='utf-8')
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.03, random_state=0)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.03, random_state=0)
     # encode_dataset(X, y)
 
     with open('resources/encoded_X.pickle', 'rb') as f:
@@ -108,16 +113,25 @@ if __name__ == '__main__':
         two_way_y = pickle.load(f)
 
     BATCH_SIZE = 64
-    train_batches = make_batches(tokenize_pairs(X_train, y_train), batch_size=BATCH_SIZE)
-    test_batches = make_batches(tokenize_pairs(X_test, y_test), batch_size=BATCH_SIZE)
-    # transformer_training.fit(train_batches)
+    # train_batches = make_batches(tokenize_pairs(X_train, y_train), batch_size=BATCH_SIZE)
+    # val_batches = make_batches(tokenize_pairs(X_val, y_val), batch_size=BATCH_SIZE)
 
-    evaluate.evaluate_test(X_test, y_test, two_way_X, two_way_y)
-    """
-    text, pesi = evaluate.evaluate("<start>le<s>donne<s>i<s>cavallier<s>l'<s>arme<s>gli<s>amori<end>",
-                                   two_way_X, two_way_y, max_length=80)
-    print("INPUT: Le donne, i cavallier, l'arme, gli amori")
-    print("TOKENIZED INPUT: ", tokenize(two_way_X, "<start>le<s>donne<s>i<s>cavallier<s>l'<s>arme<s>gli<s>amori<end>", X=True))
-    print("PRED: ", make_human_understandable(text))
-    print("TOKENIZED PRED: ", text)
-    """
+    # train_accuracies, val_accuracies, train_losses, val_losses = transformer_training.fit(train_batches, val_batches)
+    # np.save('./training_data/train_accuracies.npy', train_accuracies)
+    # np.save('./training_data/val_accuracies.npy', val_accuracies)
+    # np.save('./training_data/train_losses.npy', train_losses)
+    # np.save('./training_data/val_losses.npy', val_losses)
+
+    # transformer_training.get_encoder_emb(two_way_X)
+    # transformer_training.get_decoder_emb(two_way_y)
+
+    #  evaluate.evaluate_test(X_test, y_test, two_way_X, two_way_y)
+
+    for i, line in enumerate(X):
+        if i % 50 == 0:
+            print(i)
+        if '<unl>' in line:
+            line = re.sub(r'<unl>', '', line)
+            output, _ = evaluate.evaluate(line, two_way_X, two_way_y, max_length=200)
+            y[i] = output
+    np.savetxt("resources/y_cesura.csv", y, fmt='%s', delimiter=',')

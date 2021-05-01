@@ -35,14 +35,33 @@ def check_female_caesura(formed_verse):
     return pos
 
 
+def clean_text(text):
+    new_text = []
+    for line in text:
+        new_line = re.sub(r'á', 'à', line)
+        new_line = re.sub(r'í', 'ì', new_line)
+        new_line = re.sub(r'ó', 'ò', new_line)
+        new_line = re.sub(r'ú', 'ù', new_line)
+        new_line = re.sub(r'(\w)è(\w)', r'\1e\2', new_line)
+        new_line = re.sub(r'(\w)à(\w)', r'\1a\2', new_line)
+        new_line = re.sub(r'(\w)ù(\w)', r'\1u\2', new_line)
+        new_line = re.sub(r'(\w)ì(\w)', r'\1i\2', new_line)
+        new_line = re.sub(r'(\w)ò(\w)', r'\1o\2', new_line)
+        new_line = re.sub(r'(’)|(‘)', '\'', new_line)
+        new_text.append(new_line)
+    return new_text
+
+
 def main():
     file_X = open('resources/X.csv', 'r+', encoding='utf-8')
     file_y = open('resources/y.csv', 'r+', encoding='utf-8')
-    file_dest = open('resources/y_cesura.csv', 'w+', encoding='utf-8')
+    file_dest_y = open('resources/y_cesura.csv', 'w+', encoding='utf-8')
+    file_dest_X = open('resources/X_cesura.csv', 'w+', encoding='utf-8')
+
     with open('./resources/orig/dantes_dictionary.pkl', 'rb') as f:
         dictionary = pickle.load(f)
 
-    # Latin words not considered in dictionary from Asperti
+    # Latin words not considered in dictionary
     dictionary['aegypto'] = [((1, 2, -1, 0), 'a|egyp|to', 1)]
     dictionary['voil'] = [((1, 1, 0, 0), 'voil', 1)]
     dictionary['gausen'] = [((0, 2, 0, 0), 'gau|sen', 1)]
@@ -50,7 +69,8 @@ def main():
 
     lines_X = file_X.readlines()
     lines_y = file_y.readlines()
-    new_lines = []
+    new_lines_y = []
+    new_lines_X = []
 
     for i, syl_line in enumerate(lines_X):
         ##### STRIPPING DOWN VERSE #####
@@ -72,12 +92,11 @@ def main():
         # words_syl è una lista di parole contenenti <syl> e <s> in caso di sinalefe
 
         formed_verse = []
-        num_snl = 0 # recalculates for each line the number of synalefa
+        num_snl = 0  # recalculates for each line the number of synalefa
         for j, w in enumerate(words_syl):
             word_syls = w.split('<syl>')
             for rel_syl_index in range(len(word_syls)):
                 prop = [0, 0]
-                # FIXME: find where to insert num_snl, not sure this is right
                 num_snl += len(re.findall(r'<s>', word_syls[rel_syl_index]))
                 if len(word_syls) + pos_acc_array[j + num_snl][0] - 1 == rel_syl_index:
                     prop[0] = 1
@@ -93,36 +112,49 @@ def main():
         if pos < 3:
             pos = check_female_caesura(formed_verse)
 
-        ##### REBUILDING VERSE ####
-        new_line = '<start><syl>'
-        counter = -1
-        for j, w in enumerate(words_syl):
-            counter += len(w.split('<syl>'))
-            new_line += w
-            if counter != pos:
-                new_line += '<s>'
-            else:
-                new_line += '<c><s>'
-            if j < len(words_syl) - 1:
-                new_line += '<syl>'
-        new_line += '<end>\n'
-
-        if '<c>' in new_line:
-            new_line = re.sub(r'(’)|(‘)', '\'', new_line)
-            new_lines.append(new_line)
-
-        print(pos_acc_array)
-        print(formed_verse)
-        print(new_line)
+        if pos > 2:
+            ##### REBUILDING VERSE ####
+            new_line = '<start><syl>'
+            counter = -1
+            for j, w in enumerate(words_syl):
+                counter += len(w.split('<syl>'))
+                new_line += w
+                if counter != pos:
+                    new_line += '<s>'
+                else:
+                    new_line += '<c><s>'
+                if j < len(words_syl) - 1:
+                    new_line += '<syl>'
+            new_line += '<end>\n'
+            new_line = re.sub(r'<s><end>', '<end>', new_line)
+            new_lines_y.append(new_line)
+            new_lines_X.append(re.sub(r'<syl>|<c>', '', new_line))
+        else:
+            new_line = '<unl><start><syl>'
+            counter = -1
+            for j, w in enumerate(words_syl):
+                counter += len(w.split('<syl>'))
+                new_line += w + '<s>'
+                if j < len(words_syl) - 1:
+                    new_line += '<syl>'
+            new_line += '<end>\n'
+            new_line = re.sub(r'<s><end>', '<end>', new_line)
+            new_lines_X.append(re.sub(r'<syl>', '', new_line))
+            new_lines_y.append('<unl>\n')
 
     # Troubleshooting
-    print(f"Added {sum([len(re.findall(r'<c>', line)) for line in new_lines])} "
+    print(f"Added {sum([len(re.findall(r'<c>', line)) for line in new_lines_y])} "
           f"caesuras instead of {len(lines_X)}")
 
-    file_dest.writelines(new_lines)
+    new_lines_X = clean_text(new_lines_X)
+    new_lines_y = clean_text(new_lines_y)
+
+    file_dest_y.writelines(new_lines_y)
+    file_dest_X.writelines(new_lines_X)
     file_y.close()
     file_X.close()
-    file_dest.close()
+    file_dest_y.close()
+    file_dest_X.close()
 
 
 if __name__ == '__main__':

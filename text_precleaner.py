@@ -14,9 +14,7 @@ def main(do_x):
                         r'([”])|(\()|(\))|(\[)|(\])|(—)',
                         "", ''.join(lines_orig).lower())
     # lines_dest = re.sub(r'(’)|(‘)', '\'', lines_dest)
-    # lines_dest = re.sub(r' \' ', ' i ', lines_dest)
     lines_dest = re.sub(r' ’ ', ' i ', lines_dest)
-
     lines_dest = re.sub(r'.*\d', '', lines_dest)
     lines_dest = re.sub(r'.*• canto.*', '', lines_dest)
     # lines_dest = re.sub(r'ä', 'a', lines_dest)
@@ -24,14 +22,12 @@ def main(do_x):
     # lines_dest = re.sub(r'ï', 'i', lines_dest)
     # lines_dest = re.sub(r'ö', 'o', lines_dest)
     # lines_dest = re.sub(r'ü', 'u', lines_dest)
-
-    '''lines_dest = re.sub(r'á', 'à', lines_dest)
-    lines_dest = re.sub(r'í', 'ì', lines_dest)
-    lines_dest = re.sub(r'ó', 'ò', lines_dest)
-    lines_dest = re.sub(r'ú', 'ù', lines_dest)
-    lines_dest = re.sub(r'k', 'c', lines_dest)
-    lines_dest = re.sub(r'j', 'g', lines_dest)'''
-
+    # lines_dest = re.sub(r'á', 'à', lines_dest)
+    # lines_dest = re.sub(r'í', 'ì', lines_dest)
+    # lines_dest = re.sub(r'ó', 'ò', lines_dest)
+    # lines_dest = re.sub(r'ú', 'ù', lines_dest)
+    # lines_dest = re.sub(r'k', 'c', lines_dest)
+    # lines_dest = re.sub(r'j', 'g', lines_dest)
     # lines_dest = re.sub(r'x', 'cs', lines_dest)
     # lines_dest = re.sub(r'y', 'i', lines_dest)
 
@@ -50,11 +46,11 @@ def main(do_x):
     # lines_dest = re.sub(r'^\|', '', lines_dest)
     lines_dest = re.sub(r'\n', ' \n', lines_dest)
 
-    '''lines_dest = re.sub(r'(\w)è(\w)', r'\1e\2', lines_dest)
-    lines_dest = re.sub(r'(\w)à(\w)', r'\1a\2', lines_dest)
-    lines_dest = re.sub(r'(\w)ù(\w)', r'\1u\2', lines_dest)
-    lines_dest = re.sub(r'(\w)ì(\w)', r'\1i\2', lines_dest)
-    lines_dest = re.sub(r'(\w)ò(\w)', r'\1o\2', lines_dest)'''
+    # lines_dest = re.sub(r'(\w)è(\w)', r'\1e\2', lines_dest)
+    # lines_dest = re.sub(r'(\w)à(\w)', r'\1a\2', lines_dest)
+    # lines_dest = re.sub(r'(\w)ù(\w)', r'\1u\2', lines_dest)
+    # lines_dest = re.sub(r'(\w)ì(\w)', r'\1i\2', lines_dest)
+    # lines_dest = re.sub(r'(\w)ò(\w)', r'\1o\2', lines_dest)
     # lines_dest = re.sub(r'(\w+i)\'', r'\1i', lines_dest)
     lines_dest = re.sub(r'[ ]+', r' ', lines_dest)
 

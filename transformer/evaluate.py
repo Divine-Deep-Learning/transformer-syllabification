@@ -13,7 +13,7 @@ def check_next_syl(two_way_y, syl, output, sentence):
     output = detokenize(two_way_y, output)
     output = re.sub(r'<syl>', '', output)
     sentence = re.sub(output, '', sentence)
-    if syl == '<syl>' or syl == '<end>' or re.search(r'^' + syl, sentence):
+    if syl == '<syl>' or syl == '<end>' or syl == '<c>' or re.search(r'^' + syl, sentence):
         return True
     return False
 
@@ -39,8 +39,9 @@ def evaluate(sentence, two_way_X, two_way_y, max_length=40):
         predictions = predictions[:, -1:, :]  # (batch_size, 1, vocab_size)
         """ CHANGE START: decomment only one of them """
         """ 1 - ORIGINAL"""
-        # predicted_id = tf.argmax(predictions, axis=-1)
+        predicted_id = tf.argmax(predictions, axis=-1)
         """ 2 - MODIFIED"""
+        """
         predicted_id_orig = tf.argmax(predictions, axis=-1)
         count = 0
         while True:
@@ -55,6 +56,7 @@ def evaluate(sentence, two_way_X, two_way_y, max_length=40):
             predictions[:, :, predicted_id.numpy()] = -100
             predictions = tf.convert_to_tensor(predictions)
             count += 1
+            """
         """ CHANGE STOP """
 
         output = tf.concat([output, predicted_id], axis=-1)
