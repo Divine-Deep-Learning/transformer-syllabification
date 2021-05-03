@@ -96,13 +96,12 @@ def make_batches(X_y_tok, batch_size):
         if batch_size + i < len(X_tok):
             batches.append((tf.cast(tf.ragged.constant(X_tok[i:i + batch_size]), tf.int64).to_tensor(),
                             (tf.cast(tf.ragged.constant(y_tok[i:i + batch_size]), tf.int64).to_tensor())))
-            # TODO: use the whole dataset
     return batches
 
 
 if __name__ == '__main__':
     X = np.loadtxt("resources/X_cesura.csv", dtype=str, delimiter=',', encoding='utf-8')
-    y = np.loadtxt("resources/y_cesura.csv", dtype=str, delimiter=',', encoding='utf-8')
+    y = np.loadtxt("resources/y_cesura.csv", dtype=str, delimiter=',')
 
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.03, random_state=0)
     # encode_dataset(X, y)
@@ -125,13 +124,13 @@ if __name__ == '__main__':
     # transformer_training.get_encoder_emb(two_way_X)
     # transformer_training.get_decoder_emb(two_way_y)
 
-    #  evaluate.evaluate_test(X_test, y_test, two_way_X, two_way_y)
+    X_ar = ["<start>le<s>donne<s>i<s>cavallier<s>l'<s>arme<s>gli<s>amori<end>",
+            "<start>le<s>cortesie<s>l'<s>audaci<s>imprese<s>io<s>canto<end>",
+            "<start>che<s>furo<s>al<s>tempo<s>che<s>passaro<s>i<s>mori<end>",
+            "<start>d'<s>africa<s>il<s>mare<s>e<s>in<s>francia<s>nocquer<s>tanto<end>"]
 
-    for i, line in enumerate(X):
-        if i % 50 == 0:
-            print(i)
-        if '<unl>' in line:
-            line = re.sub(r'<unl>', '', line)
-            output, _ = evaluate.evaluate(line, two_way_X, two_way_y, max_length=200)
-            y[i] = output
-    np.savetxt("resources/y_cesura.csv", y, fmt='%s', delimiter=',')
+    # evaluate.evaluate_test(X_val, y_val, two_way_X, two_way_y)
+    for query_sent in X_ar:
+        pred_text, _ = evaluate.evaluate(query_sent, two_way_X, two_way_y)
+        pred_text = make_human_understandable(pred_text)
+        print(pred_text)
