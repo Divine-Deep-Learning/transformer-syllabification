@@ -32,10 +32,13 @@ def encode_dataset(X, y):
     for row in y:
         tmp_row = re.sub(r'<syl>', r'<s>', row)
         tmp_row = re.sub(r'<start>|<end>|<c>', r'', tmp_row)
-        [encoded_set.append(w) for w in tmp_row.split('<s>')]
+        [[encoded_set.append(c) for c in w] for w in tmp_row.split('<s>')]
     encoded_set += ['<syl>', '<s>', '<start>', '<end>', '<c>']
     encoded_set = set(encoded_set)
-    encoded_set.remove("")
+    try:
+        encoded_set.remove("")
+    except KeyError:
+        pass
     [encoded_y.add(i + 1, w) for i, w in enumerate(encoded_set)]
     with open('resources/encoded_y.pickle', 'wb') as handle:
         pickle.dump(encoded_y, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -57,7 +60,7 @@ def tokenize(two_way, line, X=True):
     if X:
         tok_X = []
         for w in spaced_line:
-            if w in ['<start>', '<end>', '<s>']:
+            if w in ['<start>', '<end>', '<s>', '<syl>', '<c>']:
                 tok_X.append(two_way.get(w))
             else:
                 [tok_X.append(two_way.get(c)) for c in w]
@@ -85,7 +88,7 @@ def make_human_understandable(sentence):
 
 def tokenize_pairs(X, y):
     X_tok = [tokenize(two_way_X, l, X=True) for l in X]
-    y_tok = [tokenize(two_way_y, l, X=False) for l in y]
+    y_tok = [tokenize(two_way_y, l, X=True) for l in y]
     return X_tok, y_tok
 
 
@@ -112,8 +115,8 @@ if __name__ == '__main__':
         two_way_y = pickle.load(f)
 
     BATCH_SIZE = 64
-    # train_batches = make_batches(tokenize_pairs(X_train, y_train), batch_size=BATCH_SIZE)
-    # val_batches = make_batches(tokenize_pairs(X_val, y_val), batch_size=BATCH_SIZE)
+    train_batches = make_batches(tokenize_pairs(X_train, y_train), batch_size=BATCH_SIZE)
+    val_batches = make_batches(tokenize_pairs(X_val, y_val), batch_size=BATCH_SIZE)
 
     # train_accuracies, val_accuracies, train_losses, val_losses = transformer_training.fit(train_batches, val_batches)
     # np.save('./training_data/train_accuracies.npy', train_accuracies)
@@ -129,8 +132,10 @@ if __name__ == '__main__':
             "<start>che<s>furo<s>al<s>tempo<s>che<s>passaro<s>i<s>mori<end>",
             "<start>d'<s>africa<s>il<s>mare<s>e<s>in<s>francia<s>nocquer<s>tanto<end>"]
 
-    # evaluate.evaluate_test(X_val, y_val, two_way_X, two_way_y)
+    evaluate.evaluate_test(X_val, y_val, two_way_X, two_way_y)
+    """     
     for query_sent in X_ar:
         pred_text, _ = evaluate.evaluate(query_sent, two_way_X, two_way_y)
         pred_text = make_human_understandable(pred_text)
         print(pred_text)
+        """

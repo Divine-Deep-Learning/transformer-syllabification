@@ -18,7 +18,7 @@ def check_next_syl(two_way_y, syl, output, sentence):
     return False
 
 
-def evaluate(sentence, two_way_X, two_way_y, max_length=40):
+def evaluate(sentence, two_way_X, two_way_y, max_length=300):
     encoder_input = tf.cast(tf.convert_to_tensor([tokenize(two_way_X, sentence)]), tf.int64)
     start, end = two_way_y.get('<start>'), two_way_y.get('<end>')
     output = tf.convert_to_tensor([start])
