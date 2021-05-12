@@ -7,6 +7,7 @@ This repository contains the entire code that syllabifies only
 # Demos of syllabified unseen hendecasyllables
 (special tokens for space and verse ending are omitted for readability purposes)
 
+```
 INPUT:  le donne i cavallier l' arme gli amori  
 PRED:   |le |don|ne i |ca|val|lier<c> |l' ar|me |gli a|mo|ri
 
@@ -18,3 +19,4 @@ PRED:   |che |fu|ro al |tem|po<c> |che |pas|sa|ro i |mo|ri
   
 INPUT:  d' africa il mare e in francia nocquer tanto  
 PRED:   |d' af|ri|ca il |ma|re e<c> |in |fran|cia |noc|quer tan|to
+```
