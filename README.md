@@ -2,7 +2,7 @@
 
 
 We aim at showing that the usage of Transformer language model can be employed in Italian poetry text generation. We show two models, one that syllabifies and inserts caesura in any Italian hendecasyllable, and one that generates syllabified text with caesura in Dante's Divine Comedy style.
-This repository contains the entire code that syllabifies only
+This repository contains the entire code that syllabifies only.
 
 # Demos of syllabified unseen hendecasyllables
 (special tokens for space and verse ending are omitted for readability purposes)
