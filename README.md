@@ -20,3 +20,10 @@ PRED:   |che |fu|ro al |tem|po<c> |che |pas|sa|ro i |mo|ri
 INPUT:  d' africa il mare e in francia nocquer tanto  
 PRED:   |d' af|ri|ca il |ma|re e<c> |in |fran|cia |noc|quer tan|to
 ```
+
+
+## Embedding Space Projection
+
+<p align='center'>
+  <img src="resources/embedding.gif" width="80%"/>
+</p>
