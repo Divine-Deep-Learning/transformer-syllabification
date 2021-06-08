@@ -85,3 +85,24 @@ def main(do_x):
 if __name__ == '__main__':
     main(do_x=False)
     main(do_x=True)
+
+
+def sub_cleaner(raw_line):
+
+    line_orig = raw_line
+    line_dest = re.sub(r'([,])|([.])|([;])|([:])|([!])|([?])|'
+                        r'([-])|([«])|([»])|(["])|([“])|([‟])|'
+                        r'([”])|(\()|(\))|(\[)|(\])|(—)',
+                        "", line_orig.lower())
+    line_dest = re.sub(r' ’ ', ' i ', line_dest)
+    line_dest = re.sub(r'.*\d', '', line_dest)
+    line_dest = re.sub(r'.*• canto.*', '', line_dest)
+    line_dest = re.sub(r'[ ]+', r' ', line_dest)
+    line_dest = re.sub(r' $', r'\n', line_dest)
+    line_dest = re.sub(r'\|', r'', line_dest)
+    line_dest = re.sub(r' ', r'<s>', line_dest)
+    line_dest = re.sub(r'^', r'<start>', line_dest)
+    line_dest = re.sub(r'<start>$', r'', line_dest)
+    line_dest += '<end>'
+
+    return line_dest

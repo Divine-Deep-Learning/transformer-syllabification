@@ -8,6 +8,7 @@ from two_way import TwoWay
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from transformer import transformer_training, evaluate
+import text_precleaner as text_precleaner_
 
 sys.path.insert(1, './syllabificator')
 
@@ -127,15 +128,15 @@ if __name__ == '__main__':
     # transformer_training.get_encoder_emb(two_way_X)
     # transformer_training.get_decoder_emb(two_way_y)
 
-    X_ar = ["<start>le<s>donne<s>i<s>cavallier<s>l'<s>arme<s>gli<s>amori<end>",
-            "<start>le<s>cortesie<s>l'<s>audaci<s>imprese<s>io<s>canto<end>",
-            "<start>che<s>furo<s>al<s>tempo<s>che<s>passaro<s>i<s>mori<end>",
-            "<start>d'<s>africa<s>il<s>mare<s>e<s>in<s>francia<s>nocquer<s>tanto<end>"]
+    # evaluate.evaluate_test(X_val, y_val, two_way_X, two_way_y)
 
-    evaluate.evaluate_test(X_val, y_val, two_way_X, two_way_y)
-    """     
+    # CUSTOM QUERY
+
+    X_ar = ["Le donne, i cavallier, l'arme, gli amori,",
+            "le cortesie, l'audaci imprese io canto"]
+
     for query_sent in X_ar:
-        pred_text, _ = evaluate.evaluate(query_sent, two_way_X, two_way_y)
+        q_cleaned = text_precleaner_.sub_cleaner(query_sent)
+        pred_text, _ = evaluate.evaluate(q_cleaned, two_way_X, two_way_y)
         pred_text = make_human_understandable(pred_text)
         print(pred_text)
-        """
