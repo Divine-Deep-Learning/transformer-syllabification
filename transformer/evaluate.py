@@ -70,14 +70,12 @@ def evaluate(sentence, two_way_X, two_way_y, max_length=300):
 
 def evaluate_test(X_test, y_test, two_way_X, two_way_y):
     print(len(X_test))
-    distances = []
-    for query_sent, true_sent in zip(X_test[10:30], y_test[10:30]):
+    correct = 0
+    for query_sent, true_sent in zip(X_test[:30], y_test[:30]):
         pred_text, attention_w = evaluate(query_sent, two_way_X, two_way_y)
+        if true_sent == pred_text:
+            correct += 1
         pred_text = make_human_understandable(pred_text)
         true_sent = make_human_understandable(true_sent)
         print(f"pred: {pred_text}\norig: {true_sent}")
-        lev = levenshtein_distance(pred_text, true_sent)
-        lower = abs(len(pred_text) - len(true_sent))
-        upper = max(len(pred_text), len(true_sent))
-        distances.append((lev - lower) / (upper - lower))
-    print(1 - np.mean(distances))
+    print("Accuracy ", len(X_test) / correct)
